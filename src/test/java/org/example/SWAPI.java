@@ -1,75 +1,66 @@
 package org.example;
 
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
+import java.io.IOException;
 import java.net.URL;
 import java.util.Random;
+import java.util.Scanner;
 
 public class SWAPI {
-    public static void main(String[] args) throws Exception {
-        // Generate random character IDs and starship ID
+
+    public static void main(String[] args) throws IOException {
+        // create a new instance of the Random class
         Random rand = new Random();
-        int charId1 = rand.nextInt(15) + 1;
-        int charId2 = rand.nextInt(15) + 1;
-        int starshipId = rand.nextInt(30) + 1;
 
-        // Get character data from API
-        String charData1 = getData("https://swapi.dev/api/people/" + charId1);
-        String charData2 = getData("https://swapi.dev/api/people/" + charId2);
+        // generate two random numbers between 1 and 15 (inclusive)
+        int id1 = rand.nextInt(15) + 1;
+        int id2 = rand.nextInt(15) + 1;
 
-        // Get starship data from API
-        String starshipData = getData("https://swapi.dev/api/starships/" + starshipId);
+        // use the two generated IDs to form URLs for the two characters
+        String url1 = "https://swapi.dev/api/people/" + id1 + "/";
+        String url2 = "https://swapi.dev/api/people/" + id2 + "/";
 
-        // Extract character surnames
-        String surname1 = extractSurname(charData1);
-        String surname2 = extractSurname(charData2);
+        // create new URL objects for the two character URLs
+        URL urlObj1 = new URL(url1);
+        URL urlObj2 = new URL(url2);
 
-        // Determine character honourifics
-        String honourific1 = getHonourific(charData1);
-        String honourific2 = getHonourific(charData2);
+        // create new Scanner objects to read data from the character URLs
+        Scanner scanner1 = new Scanner(urlObj1.openStream());
+        Scanner scanner2 = new Scanner(urlObj2.openStream());
 
-        // Print sentence
-        System.out.println(honourific1 + " " + surname1 + " and " + honourific2 + " " + surname2 +
-                " cruising around in their " + extractStarshipName(starshipData));
-    }
+        // read the data from the character URLs and store it in two Strings
+        String character1 = scanner1.nextLine();
+        String character2 = scanner2.nextLine();
 
-    // Returns the data from the specified URL as a String
-    private static String getData(String url) throws Exception {
-        HttpURLConnection conn = (HttpURLConnection) new URL(url).openConnection();
-        conn.setRequestMethod("GET");
-        BufferedReader rd = new BufferedReader(new InputStreamReader(conn.getInputStream()));
-        StringBuilder result = new StringBuilder();
-        String line;
-        while ((line = rd.readLine()) != null) {
-            result.append(line);
-        }
-        rd.close();
-        return result.toString();
-    }
+        // extract the character names and genders from the two Strings
+        String name1 = character1.split("\"name\":\"")[1].split("\",\"")[0];
+        String name2 = character2.split("\"name\":\"")[1].split("\",\"")[0];
+        String gender1 = character1.split("\"gender\":\"")[1].split("\",\"")[0];
+        String gender2 = character2.split("\"gender\":\"")[1].split("\",\"")[0];
 
-    // Returns the character's surname
-    private static String extractSurname(String data) {
-        int index = data.indexOf("name");
-        int start = data.indexOf(" ", index + 7) + 1;
-        int end = data.indexOf("\"", start);
-        return data.substring(start, end);
-    }
+        // determine the honorifics for the two characters based on gender
+        String honorific1 = gender1.equals("male") ? "Mr." : "Ms.";
+        String honorific2 = gender2.equals("male") ? "Mr." : "Ms.";
 
-    // Returns the character's honourific
-    private static String getHonourific(String data) {
-        int index = data.indexOf("gender");
-        int start = data.indexOf(" ", index + 8) + 1;
-        int end = data.indexOf("\"", start);
-        String gender = data.substring(start, end);
-        return gender.equals("male") ? "Mr." : "Ms.";
-    }
+        // generate a random number between 1 and 30 (inclusive)
+        int shipId = rand.nextInt(30) + 1;
 
-    // Returns the starship's name
-    private static String extractStarshipName(String data) {
-        int index = data.indexOf("name");
-        int start = data.indexOf(" ", index + 7) + 1;
-        int end = data.indexOf("\"", start);
-        return data.substring(start, end);
+        // use the generated ship ID to form a URL for the starship
+        String shipUrl = "https://swapi.dev/api/starships/" + shipId + "/";
+
+        // create a new URL object for the starship URL
+        URL shipUrlObj = new URL(shipUrl);
+
+        // create a new Scanner object to read data from the starship URL
+        Scanner shipScanner = new Scanner(shipUrlObj.openStream());
+
+        // read the data from the starship URL and store it in a String
+        String shipData = shipScanner.nextLine();
+
+        // extract the starship name from the String
+        String shipName = shipData.split("\"name\":\"")[1].split("\",\"")[0];
+
+        // print the sentence with the randomly generated values
+        System.out.println(honorific1 + " " + name1 + " and " + honorific2 + name2 +
+                " cruising around in their " + shipName);
     }
 }
